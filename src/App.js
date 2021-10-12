@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Progress, Button } from 'antd';
 import axios from 'axios';
 import './App.css';
@@ -18,7 +18,6 @@ const App = () => {
 
   const onClickScreen = () => {
     if (state === 'waiting') {
-      renderRankList();
       setState('ready');
       setMessage('준비');
       screenNow();
@@ -60,26 +59,17 @@ const App = () => {
       </>
     );
   };
-  const renderRankList = () => {
+
+  useEffect(() => {
     axios
-      .get('http://127.0.0.1:8080/users/total-rank')
-      .then((res) => {
-        console.log(res.data);
-        setRankList(res.data);
-      })
-      .catch((err) => console.error(err));
-    return rankList.length === 0 ? null : (
-      <>
-        {rankList.map((v, i) => (
-          <>
-            <div key={i}>
-              {i + 1}등 : {v.name}({v.ratetime}ms)
-            </div>
-          </>
-        ))}
-      </>
-    );
-  };
+    .get('http://127.0.0.1:8080/users/total-rank')
+    .then((res) => {
+      console.log(res.data);
+      setRankList(res.data);
+    })
+    .catch((err) => console.error(err));
+  }, [])
+
   return (
     <>
       <div id="back">
@@ -98,7 +88,14 @@ const App = () => {
           </span>
         </div>
         <div id="result">{renderScoreList()}</div>
-        <div id="rank">{renderRankList()}</div>
+              
+        {rankList.map((v, i) => (
+          <>
+            <div key={i}>
+              {i + 1}등 : {v.name}({v.ratetime}ms)
+            </div>
+          </>
+        ))}
       </div>
     </>
   );
