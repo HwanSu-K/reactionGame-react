@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Modal, Progress, Button, Typography, Space, Input } from 'antd';
 import axios from 'axios';
 import './App.css';
@@ -11,7 +11,6 @@ const App = () => {
   const [state, setState] = useState('waiting');
   const [message, setMessage] = useState('시작');
   const [result, setResult] = useState([]);
-  const [rankList, setRankList] = useState([]);
   const [visible, setVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [name, setName] = useState('');
@@ -26,7 +25,7 @@ const App = () => {
   const handleOk = () => {
     setConfirmLoading(true);
     setTimeout(() => {
-      axios.post('http://developer-green-final.click:9000/members', {
+      axios.post('https://developer-green-final.click/members', {
         memberName: name,
         rateTime: parseInt(result.reduce((a, c) => a + c) / result.length),
       });
@@ -44,12 +43,14 @@ const App = () => {
     setVisible(false);
   };
 
-  function info() {
+  const info = async () => {
+    const rankList = await axios.get('https://developer-green-final.click/members/rank');
+
     Modal.info({
-      title: '전체 랭킹',
+      title: '이번주 랭킹',
       content: (
         <>
-          {rankList.map((v, i) => (
+          {rankList.data.map((v, i) => (
             <div key={i}>
               {i + 1}등 : {v.memberName}({v.rateTime}ms)
             </div>
@@ -58,7 +59,7 @@ const App = () => {
       ),
       onOk() {},
     });
-  }
+  };
 
   const timeout = useRef(null);
   const startTime = useRef();
@@ -110,15 +111,6 @@ const App = () => {
     );
   };
 
-  useEffect(() => {
-    axios
-      .get('http://developer-green-final.click:9000/members/rank')
-      .then((res) => {
-        setRankList(res.data);
-      })
-      .catch((err) => console.error(err));
-  }, [visible]);
-
   return (
     <>
       <div id="back">
@@ -138,9 +130,10 @@ const App = () => {
             )}
           </span>
         </div>
-
+        <p style={{ fontWeight: 'bold', fontSize: '20px' }}>테스트는 총 5회 진행 됩니다.</p>
+        <p style={{ fontWeight: 'bold', fontSize: '20px' }}>초록색으로 변할때 터치해 주세요.</p>
         <Button style={{ marginBottom: 30 }} onClick={info}>
-          랭킹 확인
+          주간 랭킹
         </Button>
         <Space direction="vertical">{renderScoreList()}</Space>
       </div>
